@@ -12,24 +12,27 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+// add understanding comments by weixsong
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <pthread.h>
 
-#define MAX_STRING 100
-#define EXP_TABLE_SIZE 1000
-#define MAX_EXP 6
-#define MAX_SENTENCE_LENGTH 1000
-#define MAX_CODE_LENGTH 40
+#define MAX_STRING 100           // maximum length of a word
+#define EXP_TABLE_SIZE 1000      // EXP lookup table size, used to speedup exp computation
+#define MAX_EXP 6                // exp(x>6) or exp(x<-6) will be considered as 0
+#define MAX_SENTENCE_LENGTH 1000 // max sentence length, CBOW & Skip-Gram are computed by sentences
+#define MAX_CODE_LENGTH 40       // max Hierarchical Softmax code length
 
+// load parameter of hash table is 0.7
 const int vocab_hash_size = 30000000;  // Maximum 30 * 0.7 = 21M words in the vocabulary
 
 typedef float real;                    // Precision of float numbers
 
 struct vocab_word {
-  long long cn;
+  long long cn;  // word count
   int *point;
   char *word, *code, codelen;
 };
