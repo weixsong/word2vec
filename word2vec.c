@@ -95,24 +95,35 @@ void InitUnigramTable() {
 // Reads a single word from a file, assuming space + tab + EOL to be word boundaries
 void ReadWord(char *word, FILE *fin) {
   int a = 0, ch;
-  while (!feof(fin)) {
+  while (!feof(fin))
+  {
     ch = fgetc(fin);
-    if (ch == 13) continue;
-    if ((ch == ' ') || (ch == '\t') || (ch == '\n')) {
-      if (a > 0) {
+    if (ch == 13) continue;  // leave out \r
+    if ((ch == ' ') || (ch == '\t') || (ch == '\n'))
+    {
+      // if a > 0, then we meet a new word, break the while loop
+      if (a > 0)
+      {
+        // if a > 0 and meet \n, this means meet the end of a sentence, then we put back \n, and break while loop then read a word
         if (ch == '\n') ungetc(ch, fin);
         break;
       }
-      if (ch == '\n') {
+      
+      // if a == 0 and meet \n, this means a new sentence will begin, then return </s> as the start the new sentence
+      // </s> is considered as a word of the begining of a sentence
+      if (ch == '\n')
+      {
         strcpy(word, (char *)"</s>");
         return;
-      } else continue;
+      }
+      else continue;
     }
     word[a] = ch;
     a++;
     if (a >= MAX_STRING - 1) a--;   // Truncate too long words
   }
-  word[a] = 0;
+  
+  word[a] = 0; // add string end \0
 }
 
 // Returns hash value of a word
