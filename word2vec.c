@@ -48,25 +48,47 @@ real alpha = 0.025, starting_alpha, sample = 1e-3;
 real *syn0, *syn1, *syn1neg, *expTable;
 clock_t start;
 
-int hs = 0, negative = 5;
-const int table_size = 1e8;
-int *table;
 
+int hs = 0, negative = 5;
+const int table_size = 1e8;   // bigger table will lead to more accurate sample
+int *table;                   // table is used to do Negative Sample
+
+// Comments from Paper: Distributed Representations of Words and Phrases and their Compositionality
+// Both NCE and NEG have the noise distribution Pn(w) as a free parameter. We investigated a number
+// of choices for Pn(w) and found that the unigram distribution U(w) raised to the 3/4rd power (i.e.,
+// U(w)3/4/Z) outperformed significantly the unigram and the uniform distributions, for both NCE
+// and NEG on every task we tried including language modeling (not reported here).
+// So, here this Unigram table is used for Negative sampling
+// And, it use some trick to do negative sampling by sompute the cumulative probability distribution and 
+// separate the space into table_size
 void InitUnigramTable() {
   int a, i;
   double train_words_pow = 0;
   double d1, power = 0.75;
   table = (int *)malloc(table_size * sizeof(int));
-  for (a = 0; a < vocab_size; a++) train_words_pow += pow(vocab[a].cn, power);
+  for (a = 0; a < vocab_size; a++) 
+  {
+    train_words_pow += pow(vocab[a].cn, power); // compute cumulative 3/4 power probability distribution
+  }
+  
   i = 0;
-  d1 = pow(vocab[i].cn, power) / train_words_pow;
+  
+  // compute cumulative probability distribution
+  d1 = pow(vocab[i].cn, power) / train_words_pow; 
+  
+  // init negative sample table, each table index will correspond to a word
   for (a = 0; a < table_size; a++) {
     table[a] = i;
-    if (a / (double)table_size > d1) {
+    if (a / (double)table_size > d1)
+    {
       i++;
       d1 += pow(vocab[i].cn, power) / train_words_pow;
     }
-    if (i >= vocab_size) i = vocab_size - 1;
+    
+    if (i >= vocab_size)
+    {
+      i = vocab_size - 1;
+    }
   }
 }
 
