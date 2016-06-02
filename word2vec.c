@@ -50,7 +50,7 @@ clock_t start;
 
 
 int hs = 0, negative = 5;
-const int table_size = 1e8;   // bigger table will lead to more accurate sample
+const int table_size = 1e8;   // bigger table will lead to more accurate negative sample
 int *table;                   // table is used to do Negative Sample
 
 // Comments from Paper: Distributed Representations of Words and Phrases and their Compositionality
@@ -134,13 +134,14 @@ int GetWordHash(char *word) {
   return hash;
 }
 
+// use int array as hash table, use array index as hash key, use array value as hash value
 // Returns position of a word in the vocabulary; if the word is not found, returns -1
 int SearchVocab(char *word) {
   unsigned int hash = GetWordHash(word);
   while (1) {
     if (vocab_hash[hash] == -1) return -1;
     if (!strcmp(word, vocab[vocab_hash[hash]].word)) return vocab_hash[hash];
-    hash = (hash + 1) % vocab_hash_size;
+    hash = (hash + 1) % vocab_hash_size; // linear address detect
   }
   return -1;
 }
